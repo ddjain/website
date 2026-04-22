@@ -137,6 +137,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="pod-scenario/">Pod Failures</a></h3>
 <span class="scenario-badge">pod_disruption_scenarios</span>
 <p class="scenario-description">Injects pod failures to test application resilience and recovery mechanisms</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--beginner">beginner</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use when you want to verify your deployments recover after pod disruptions</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -146,6 +150,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="container-scenario/">Container Failures</a></h3>
 <span class="scenario-badge">container_scenarios</span>
 <p class="scenario-description">Injects container failures based on the provided kill signal</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--beginner">beginner</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use when you need to test how your app handles individual container crashes within a pod</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -155,6 +163,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="kubevirt-vm-outage-scenario/">KubeVirt VM Outage</a></h3>
 <span class="scenario-badge">kubevirt_vm_outage</span>
 <p class="scenario-description">Simulates VM-level disruptions by deleting Virtual Machine Instances to test resilience and recovery</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--recovery">recovery</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use when running KubeVirt and need to verify VM recovery after instance deletion</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -170,6 +182,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="node-scenarios/">Node Failures</a></h3>
 <span class="scenario-badge">node_scenarios</span>
 <p class="scenario-description">Injects node failures through OpenShift/Kubernetes and cloud APIs</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--advanced">advanced</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use when you need to test workload rescheduling after node-level failures</p>
 <div class="cloud-badges">
 <span class="cloud-badge">Alibaba</span>
 <span class="cloud-badge">AWS</span>
@@ -188,6 +204,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="power-outage-scenarios/">Power Outages</a></h3>
 <span class="scenario-badge">cluster_shut_down_scenarios</span>
 <p class="scenario-description">Shuts down the cluster for a specified duration and verifies cluster health upon restart</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--destructive">destructive</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to validate full cluster recovery after a complete power-off event</p>
 <div class="cloud-badges">
 <span class="cloud-badge">Alibaba</span>
 <span class="cloud-badge">AWS</span>
@@ -206,6 +226,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="zone-outage-scenarios/">Zone Outages</a></h3>
 <span class="scenario-badge">zone_outages_scenarios</span>
 <p class="scenario-description">Creates zone outages to observe impact on cluster availability and application resilience</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--destructive">destructive</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to test multi-AZ resilience and failover behavior</p>
 <div class="cloud-badges">
 <span class="cloud-badge">AWS</span>
 <span class="cloud-badge">GCP</span>
@@ -216,6 +240,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="hog-scenarios/cpu-hog-scenario/">Node CPU Hog</a></h3>
 <span class="scenario-badge">hog_scenarios</span>
 <p class="scenario-description">Hogs CPU resources on targeted nodes to test resource contention</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--advanced">advanced</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to verify workloads handle CPU pressure and throttling correctly</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -225,6 +253,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="hog-scenarios/memory-hog-scenario/">Node Memory Hog</a></h3>
 <span class="scenario-badge">hog_scenarios</span>
 <p class="scenario-description">Hogs memory resources on targeted nodes to test memory pressure handling</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--advanced">advanced</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to test OOM-killer behavior and pod eviction under memory pressure</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -234,6 +266,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="hog-scenarios/io-hog-scenario/">Node IO Hog</a></h3>
 <span class="scenario-badge">hog_scenarios</span>
 <p class="scenario-description">Hogs IO resources on targeted nodes to test disk performance degradation</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--advanced">advanced</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to test application behavior under disk I/O saturation</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -250,6 +286,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="network-chaos-scenario/">Network Chaos</a></h3>
 <span class="scenario-badge">network_chaos_scenarios</span>
 <p class="scenario-description">Introduces network latency, packet loss, and bandwidth restriction using tc and Netem</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--advanced">advanced</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to simulate degraded network conditions and test timeout/retry logic</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -259,6 +299,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="pod-network-scenario/">Pod Network Chaos</a></h3>
 <span class="scenario-badge">pod_network_scenarios</span>
 <p class="scenario-description">Introduces network chaos at pod level including latency, packet loss, and bandwidth restriction</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--advanced">advanced</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use when you need pod-targeted network disruption rather than node-level</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -268,6 +312,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="network-chaos-ng-scenarios/">Network Chaos NG</a></h3>
 <span class="scenario-badge">network_chaos_ng_scenarios</span>
 <p class="scenario-description">Next-generation network filtering scenarios with improved infrastructure</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--advanced">advanced</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use for fine-grained traffic filtering with eBPF-based network disruption</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -277,6 +325,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="dns-outage/">DNS Outages</a></h3>
 <span class="scenario-badge">network_chaos_ng_scenarios</span>
 <p class="scenario-description">Blocks all outgoing DNS traffic from pods, preventing hostname resolution</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--destructive">destructive</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to test how your services handle DNS resolution failures</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -286,6 +338,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="etcd-split-brain/">ETCD Split Brain</a></h3>
 <span class="scenario-badge">network_chaos_ng_scenarios</span>
 <p class="scenario-description">Isolates etcd nodes to force leader re-election and test cluster resilience</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--destructive">destructive</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to validate etcd quorum recovery and cluster control plane resilience</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -295,6 +351,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="aurora-disruption/">Aurora Disruption</a></h3>
 <span class="scenario-badge">network_chaos_ng_scenarios</span>
 <p class="scenario-description">Blocks MySQL and PostgreSQL traffic to AWS Aurora database engines</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--destructive">destructive</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to test application behavior when Aurora database connections are severed</p>
 <div class="cloud-badges">
 <span class="cloud-badge">AWS</span>
 </div>
@@ -304,6 +364,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="efs-disruption/">EFS Disruption</a></h3>
 <span class="scenario-badge">network_chaos_ng_scenarios</span>
 <p class="scenario-description">Blocks connections to AWS EFS, causing temporary failure of mounted volumes</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--destructive">destructive</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to test application resilience when EFS-backed persistent storage becomes unavailable</p>
 <div class="cloud-badges">
 <span class="cloud-badge">AWS</span>
 </div>
@@ -320,6 +384,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="application-outage/">Application Outages</a></h3>
 <span class="scenario-badge">application_outages_scenarios</span>
 <p class="scenario-description">Isolates application Ingress/Egress traffic to test dependency handling and recovery timing</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--recovery">recovery</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to verify your app handles network isolation and recovers when traffic resumes</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -329,6 +397,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="service-disruption-scenarios/">Service Disruption</a></h3>
 <span class="scenario-badge">service_disruption_scenarios</span>
 <p class="scenario-description">Deletes all objects within a namespace to test service recovery and data resilience</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--destructive">destructive</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to test full namespace recovery including deployments, services, and config</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -338,6 +410,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="service-hijacking-scenario/">Service Hijacking</a></h3>
 <span class="scenario-badge">service_hijacking_scenarios</span>
 <p class="scenario-description">Hijacks service HTTP traffic to simulate custom responses and test client error handling</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--advanced">advanced</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to simulate upstream service errors and test client retry/fallback behavior</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -347,6 +423,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="syn-flood-scenario/">Syn Flood</a></h3>
 <span class="scenario-badge">syn_flood_scenarios</span>
 <p class="scenario-description">Generates substantial TCP traffic directed at Kubernetes services to test DDoS resilience</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--destructive">destructive</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to stress-test network stack and service mesh under high TCP connection load</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -363,6 +443,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="pvc-scenario/">PVC Disk Fill</a></h3>
 <span class="scenario-badge">pvc_scenarios</span>
 <p class="scenario-description">Fills up PersistentVolumeClaims to test disk space exhaustion handling</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--beginner">beginner</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to verify your app handles full-disk conditions gracefully</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
@@ -378,6 +462,10 @@ Many pod scenarios now support the `exclude_label` parameter to protect critical
 <h3><a href="time-scenarios/">Time Skew</a></h3>
 <span class="scenario-badge">time_scenarios</span>
 <p class="scenario-description">Skews system time and date to test time-sensitive applications and certificate handling</p>
+<div class="krkn-scenario-tags">
+<span class="krkn-scenario-tag krkn-scenario-tag--beginner">beginner</span>
+</div>
+<p class="krkn-scenario-when-to-use">Use to test certificate expiry, cron jobs, and time-dependent business logic</p>
 <div class="cloud-badges">
 <span class="cloud-badge cloud-badge--agnostic">Cloud Agnostic</span>
 </div>
