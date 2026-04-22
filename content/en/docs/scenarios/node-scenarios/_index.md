@@ -5,11 +5,22 @@ date: 2017-01-04
 weight: 3
 ---
 
-<krkn-hub-scenario id="node-scenarios">
-This scenario disrupts the node(s) matching the label or node name(s) on a Kubernetes/OpenShift cluster. These scenarios are performed in two different ways, either by the clusters cloud cli or by common/generic commands that can be performed on any cluster.
+## Purpose
 
+Node scenarios disrupt node(s) matching a label or node name on a Kubernetes/OpenShift cluster. Use this to validate workload rescheduling, node recovery, and cluster self-healing when nodes become unavailable.
+
+## Preconditions
+
+- Running Kubernetes (1.21+) or OpenShift cluster
+- Valid kubeconfig with cluster-admin access
+- Cloud provider credentials (for cloud-specific actions like stop/start/terminate). See [supported clouds](#clouds) for details.
+- Container runtime: Docker (20.10+) or Podman (4.0+) — required for krkn-hub and krknctl methods
+- For `restart_kubelet_scenario` and `node_crash_scenario`: SSH access to nodes (can be used without cloud provider credentials)
 
 ## Actions
+
+<krkn-hub-scenario id="node-scenarios">
+
 The following node chaos scenarios are supported:
 1. **node_start_scenario**: Scenario to start the node instance. _Need access to cloud provider_
 2. **node_stop_scenario**: Scenario to stop the node instance. _Need access to cloud provider_
@@ -25,7 +36,8 @@ The following node chaos scenarios are supported:
 11. **node_disk_detach_attach_scenario**: Scenario to detach and reattach disks (only for baremetals).
 
 ## Clouds
-Supported cloud supported:
+
+Supported clouds:
 - [AWS](node-scenarios-krkn.md#aws)
 - [Azure](node-scenarios-krkn.md#azure)
 - [OpenStack](node-scenarios-krkn.md#openstack)
@@ -53,11 +65,27 @@ Supported cloud supported:
 
 </krkn-hub-scenario>
 
+## How to Run Node Scenarios
 
+Choose your preferred method to run node scenarios:
 
-## Recovery Times
+{{< tabpane text=true >}}
+  {{< tab header="**Krkn**" lang="krkn" >}}
+{{< readfile file="_tab-krkn.md" >}}
+  {{< /tab >}}
+  {{< tab header="**Krkn-hub**" lang="krkn-hub" >}}
+{{< readfile file="_tab-krkn-hub.md" >}}
+  {{< /tab >}}
+  {{< tab header="**Krknctl**" lang="krknctl" >}}
+{{< readfile file="_tab-krknctl.md" >}}
+  {{< /tab >}}
+{{< /tabpane >}}
 
-In each node scenario, the end telemetry details of the run will show the time it took for each node to stop and recover depening on the scenario.
+## Expected Behavior
+
+### Recovery Times
+
+In each node scenario, the end telemetry details of the run will show the time it took for each node to stop and recover depending on the scenario.
 
 The details printed in telemetry:
 - *node_name*: Node name
@@ -83,48 +111,24 @@ Example:
     {
         "node_name": "cluster-name-**-master-0.438115.internal",
         "node_id": "cluster-name-**-master-0",
-        "not_ready_time": 0.1611928939819336,
-        "ready_time": 0.0,
-        "stopped_time": 146.72056317329407,
-        "running_time": 0.0,
-        "terminating_time": 0.0
-    },
-    {
-        "node_name": "cluster-name-**.438115.internal",
-        "node_id": "cluster-name-**",
         "not_ready_time": 0.0,
         "ready_time": 43.521320104599,
         "stopped_time": 0.0,
         "running_time": 12.305592775344849,
         "terminating_time": 0.0
-    },
-    {
-        "node_name": "cluster-name-**-master-0.438115.internal",
-        "node_id": "cluster-name-**-master-0",
-        "not_ready_time": 0.0,
-        "ready_time": 48.33336925506592,
-        "stopped_time": 0.0,
-        "running_time": 12.052034854888916,
-        "terminating_time": 0.0
     }
 ]
 ```
 
-## How to Run Node Scenarios
+## Failure Handling
 
-Choose your preferred method to run node scenarios:
-
-{{< tabpane text=true >}}
-  {{< tab header="**Krkn**" lang="krkn" >}}
-{{< readfile file="_tab-krkn.md" >}}
-  {{< /tab >}}
-  {{< tab header="**Krkn-hub**" lang="krkn-hub" >}}
-{{< readfile file="_tab-krkn-hub.md" >}}
-  {{< /tab >}}
-  {{< tab header="**Krknctl**" lang="krknctl" >}}
-{{< readfile file="_tab-krknctl.md" >}}
-  {{< /tab >}}
-{{< /tabpane >}}
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `cloud provider credentials not configured` | Missing or invalid cloud provider credentials | Configure AWS credentials (`~/.aws/credentials`), Azure SP, GCP service account, etc. per the cloud-specific docs |
+| `node not found` | The node name or label does not match any cluster node | Verify nodes with `kubectl get nodes --show-labels` and update the selector |
+| Node stays in `NotReady` state after scenario | The node failed to recover (common with `node_crash_scenario`) | Manually reboot the node from your cloud console or via SSH |
+| `timeout waiting for node to be Ready` | Node recovery takes longer than the configured timeout | Increase the timeout value or check node health via cloud provider console |
+| `permission denied` when stopping kubelet | The SSH key or credentials lack root/sudo access on the node | Verify SSH access and ensure the user has sudo privileges |
 
 ## Demo
 See a demo of this scenario:
