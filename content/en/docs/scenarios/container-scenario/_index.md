@@ -4,40 +4,19 @@ description:
 date: 2017-01-04
 weight: 3
 ---
+
+## Purpose
+
 <krkn-hub-scenario id="container-scenarios">
-Kraken uses the `oc exec` command to `kill` specific containers in a pod.
-This can be based on the pods namespace or labels. If you know the exact object you want to kill, you can also specify the specific container name or pod name in the scenario yaml file.
-These scenarios are in a simple yaml format that you can manipulate to run your specific tests or use the pre-existing scenarios to see how it works.
+Kills specific containers within a pod using `kill` signals sent via `oc exec`. Use this to test how your application handles individual container crashes without full pod deletion — validating container restart policies and multi-container pod resilience.
 </krkn-hub-scenario>
 
+## Preconditions
 
-## Recovery Time Metrics in Krkn Telemetry
-
-Krkn tracks three key recovery time metrics for each affected container:
-
-1. **pod_rescheduling_time** - The time (in seconds) that the Kubernetes cluster took to reschedule the pod after it was killed. This measures the cluster's scheduling efficiency and includes the time from pod deletion until the replacement pod is scheduled on a node. In some cases when the container gets killed, the pod won't fully reschedule so the pod rescheduling might be 0.0 seconds
-
-2. **pod_readiness_time** - The time (in seconds) the pod took to become ready after being scheduled. This measures application startup time, including container image pulls, initialization, and readiness probe success.
-
-3. **total_recovery_time** - The total amount of time (in seconds) from pod deletion until the replacement pod became fully ready and available to serve traffic. This is the sum of rescheduling time and readiness time.
-
-These metrics appear in the telemetry output under `PodsStatus.recovered` for successfully recovered pods. Pods that fail to recover within the timeout period appear under `PodsStatus.unrecovered` without timing data.
-
-**Example telemetry output:**
-```json
-{
-  "recovered": [
-    {
-      "pod_name": "backend-7d8f9c-xyz",
-      "namespace": "production",
-      "pod_rescheduling_time": 43.62235879898071,
-      "pod_readiness_time": 0.0,
-      "total_recovery_time": 43.62235879898071
-    }
-  ],
-  "unrecovered": []
-}
-```
+- Running Kubernetes (1.21+) or OpenShift cluster
+- Valid kubeconfig with cluster-admin access
+- RBAC: ability to `exec` into pods and `get`/`list` pods in target namespaces
+- Container runtime: Docker (20.10+) or Podman (4.0+) — required for krkn-hub and krknctl methods
 
 ## How to Run Container Scenarios
 
@@ -54,6 +33,42 @@ Choose your preferred method to run container scenarios:
 {{< readfile file="_tab-krknctl.md" >}}
   {{< /tab >}}
 {{< /tabpane >}}
+
+## Expected Behavior
+
+- The targeted container is killed with the specified signal (e.g., SIGKILL, SIGTERM)
+- Kubernetes restarts the container according to the pod's `restartPolicy`
+- The pod itself may not be rescheduled — the container restarts in-place within the same pod
+- Recovery metrics appear in telemetry output:
+
+**Recovery Time Metrics:**
+
+1. **pod_rescheduling_time** - Time for the cluster to reschedule the pod. Often 0.0 seconds for container kills since the pod stays on the same node.
+2. **pod_readiness_time** - Time for the pod to become ready after the container restart.
+3. **total_recovery_time** - Total time from container kill until the pod is fully ready.
+
+```json
+{
+  "recovered": [
+    {
+      "pod_name": "backend-7d8f9c-xyz",
+      "namespace": "production",
+      "pod_rescheduling_time": 43.62235879898071,
+      "pod_readiness_time": 0.0,
+      "total_recovery_time": 43.62235879898071
+    }
+  ],
+  "unrecovered": []
+}
+```
+
+## Failure Handling
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `unable to exec into pod` | The pod or container does not exist, or RBAC lacks `exec` permission | Verify pod exists with `kubectl get pods -n <namespace>` and grant `pods/exec` permission |
+| Container restarts but pod never becomes Ready | Readiness probe fails after container restart | Check probe configuration with `kubectl describe pod <pod>` and investigate application startup |
+| `container not found` | The specified container name does not exist in the pod | List containers with `kubectl get pod <pod> -o jsonpath='{.spec.containers[*].name}'` |
 
 ## Demo
 See a demo of this scenario:

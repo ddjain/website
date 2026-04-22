@@ -5,41 +5,22 @@ date: 2017-01-04
 weight: 3
 ---
 
-<krkn-hub-scenario id="kubevirt-outage">
-
-This scenario enables the simulation of VM-level disruptions in clusters where KubeVirt or OpenShift Containerized Network Virtualization (CNV) is installed. It allows users to delete a Virtual Machine Instance (VMI) to simulate a VM crash and test recovery capabilities.
-
-## Table of Contents
-
-- [Purpose](#purpose)
-- [Prerequisites](#prerequisites)
-- [Parameters](#parameters)
-- [Expected Behavior](#expected-behavior)
-- [Advanced Use Cases](#advanced-use-cases)
-- [Recovery Strategies](#recovery-strategies)
-- [Rollback Scenario Support](#rollback-scenario-support)
-- [Limitations](#limitations)
-- [Troubleshooting](#troubleshooting)
-
-
 ## Purpose
 
-The `kubevirt_vm_outage` scenario deletes a specific KubeVirt Virtual Machine Instance (VMI) to simulate a VM crash or outage. This helps users:
+The `kubevirt_vm_outage` scenario deletes KubeVirt Virtual Machine Instances (VMIs) to test VM-level resilience and recovery in clusters where KubeVirt or OpenShift Containerized Network Virtualization (CNV) is installed. This helps users validate that VM monitoring, automatic restart policies, and high availability configurations work as expected when a VM crashes or is lost.
 
-- Test the resilience of applications running inside VMs
-- Verify that VM monitoring and recovery mechanisms work as expected
-- Validate high availability configurations for VM workloads
-- Understand the impact of sudden VM failures on workloads and the overall system
+## Preconditions
 
-## Prerequisites
-
-Before using this scenario, ensure the following:
-
-1. KubeVirt or OpenShift CNV is installed in your cluster
-2. The target VMI exists and is running in the specified namespace
-3. Your cluster credentials have sufficient permissions to delete and create VMIs
+- Running Kubernetes (1.21+) or OpenShift cluster
+- Valid kubeconfig with access to target namespaces
+- RBAC: ability to `delete`, `get`, `list`, and `create` VMIs in target namespaces
+- KubeVirt or OpenShift CNV installed in the cluster
+- Target VMI(s) exist and are in Running state in the specified namespace
+- Container runtime: Docker (20.10+) or Podman (4.0+) — required for krkn-hub and krknctl methods
 
 ## Parameters
+
+<krkn-hub-scenario id="kubevirt-outage">
 
 The scenario supports the following parameters:
 
@@ -50,29 +31,9 @@ The scenario supports the following parameters:
 | timeout | How long to wait (in seconds) before attempting recovery for VMI to start running again | No | 60 |
 | kill_count | How many VMI's to kill serially | No | 1 |
 
-## Expected Behavior
+</krkn-hub-scenario>
 
-When executed, the scenario will:
-
-1. Validate that KubeVirt is installed and the target VMI exists
-2. Save the initial state of the VMI
-3. Delete the VMI
-4. Wait for the VMI to become running or hit the timeout
-5. Attempt to recover the VMI:
-   - If the VMI is managed by a VirtualMachine resource with runStrategy: Always, it will automatically recover
-   - If automatic recovery doesn't occur, the plugin will manually recreate the VMI using the saved state
-6. Validate that the VMI is running again
-
-{{% alert title="Note" %}}If the VM is managed by a VirtualMachine resource with `runStrategy: Always`, KubeVirt will automatically try to recreate the VMI after deletion. In this case, the scenario will wait for this automatic recovery to complete.{{% /alert %}}
-
-
-## Validating VMI SSH Connection
-
-While the kubvirt outage is running you can enable kube virt checks to check the ssh connection to a list of VMIs to test if an outage of one VMI effects any others become unready/unconnectable.
-See more details on how to enable these checks in [kubevirt checks](../../krkn/virt-checks.md)
-
-
-## Advanced Use Cases
+## Use Cases
 
 ### Testing High Availability VM Configurations
 
@@ -82,8 +43,43 @@ This scenario is particularly useful for testing high availability configuration
 - VMs with automatic restart policies
 - Applications with cross-VM resilience mechanisms
 
+### Validating VMI SSH Connection
 
-## Recovery Strategies
+While the KubeVirt outage is running you can enable KubeVirt checks to verify SSH connectivity to a list of VMIs, testing whether an outage of one VMI affects others becoming unready or unconnectable.
+See more details on how to enable these checks in [KubeVirt checks](../../krkn/virt-checks.md).
+
+## How to Run KubeVirt VM Outage Scenarios
+
+Choose your preferred method to run KubeVirt VM outage scenarios:
+
+{{< tabpane text=true >}}
+  {{< tab header="**Krkn**" lang="krkn" >}}
+{{< readfile file="_tab-krkn.md" >}}
+  {{< /tab >}}
+  {{< tab header="**Krkn-hub**" lang="krkn-hub" >}}
+{{< readfile file="_tab-krkn-hub.md" >}}
+  {{< /tab >}}
+  {{< tab header="**Krknctl**" lang="krknctl" >}}
+{{< readfile file="_tab-krknctl.md" >}}
+  {{< /tab >}}
+{{< /tabpane >}}
+
+## Expected Behavior
+
+When executed, the scenario will:
+
+1. Validate that KubeVirt is installed and the target VMI exists
+2. Save the initial state of the VMI
+3. Delete the VMI
+4. Wait for the VMI to become running or hit the timeout
+5. Attempt to recover the VMI:
+   - If the VMI is managed by a VirtualMachine resource with `runStrategy: Always`, it will automatically recover
+   - If automatic recovery doesn't occur, the plugin will manually recreate the VMI using the saved state
+6. Validate that the VMI is running again
+
+{{% alert title="Note" %}}If the VM is managed by a VirtualMachine resource with `runStrategy: Always`, KubeVirt will automatically try to recreate the VMI after deletion. In this case, the scenario will wait for this automatic recovery to complete.{{% /alert %}}
+
+### Recovery Strategies
 
 The plugin implements two recovery strategies:
 
@@ -91,7 +87,7 @@ The plugin implements two recovery strategies:
 
 2. **Manual Recovery**: If automatic recovery doesn't occur within the timeout period, the plugin will attempt to manually recreate the VMI using the saved state from before the deletion.
 
-## Recovery Time Metrics in Krkn Telemetry
+### Recovery Time Metrics in Krkn Telemetry
 
 Krkn tracks three key recovery time metrics for each affected VMI:
 
@@ -119,39 +115,23 @@ These metrics appear in the telemetry output under `PodsStatus.recovered` for su
 }
 ```
 
-## Rollback Scenario Support
+### Rollback Scenario Support
 
 Krkn supports rollback for KubeVirt VM Outage Scenario. For more details, please refer to the [Rollback Scenarios](../../rollback-scenarios/_index.md) documentation.
 
-## Limitations
+## Failure Handling
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `VMI not found` or target VMI does not exist | The `vm_name` does not match any VMI in the specified namespace | Verify VMI name with `kubectl get vmi -n <namespace>` and correct the parameter |
+| `namespace not found` | The `namespace` value does not match any namespace in the cluster | Check namespace exists with `kubectl get ns` and fix the namespace parameter |
+| `insufficient RBAC for VMI deletion` | The kubeconfig user/service account lacks permissions to delete or create VMIs | Create a ClusterRole with `virtualmachineinstances: [get, list, delete, create]` and bind it to the service account |
+| VMI not recovered within timeout | The VirtualMachine resource does not have `runStrategy: Always`, or the manual recreation failed | Increase the `timeout` parameter, verify `runStrategy` with `kubectl get vm <name> -o yaml`, or check KubeVirt controller logs |
+| `KubeVirt not installed` or CRDs missing | KubeVirt or OpenShift CNV is not properly installed in the cluster | Install KubeVirt following the [official docs](https://kubevirt.io/user-guide/) and verify CRDs with `kubectl get crd \| grep kubevirt` |
+| VMI spec changed during outage | The VM spec was modified between deletion and manual recovery, causing a mismatch | Re-run the scenario after the spec stabilizes; the saved state reflects the pre-deletion spec |
+
+### Limitations
 
 - The scenario currently supports deleting a single VMI at a time
 - If VM spec changes during the outage window, the manual recovery may not reflect those changes
-- The scenario doesn't simulate partial VM failures (e.g., VM freezing) - only complete VM outage
-
-## Troubleshooting
-
-If the scenario fails, check the following:
-
-1. Ensure KubeVirt/CNV is properly installed in your cluster
-2. Verify that the target VMI exists and is running
-3. Check that your credentials have sufficient permissions to delete and create VMIs
-4. Examine the logs for specific error messages
-
-</krkn-hub-scenario>
-
-## How to Run KubeVirt VM Outage Scenarios
-
-Choose your preferred method to run KubeVirt VM outage scenarios:
-
-{{< tabpane text=true >}}
-  {{< tab header="**Krkn**" lang="krkn" >}}
-{{< readfile file="_tab-krkn.md" >}}
-  {{< /tab >}}
-  {{< tab header="**Krkn-hub**" lang="krkn-hub" >}}
-{{< readfile file="_tab-krkn-hub.md" >}}
-  {{< /tab >}}
-  {{< tab header="**Krknctl**" lang="krknctl" >}}
-{{< readfile file="_tab-krknctl.md" >}}
-  {{< /tab >}}
-{{< /tabpane >}}
+- The scenario doesn't simulate partial VM failures (e.g., VM freezing) — only complete VM outage

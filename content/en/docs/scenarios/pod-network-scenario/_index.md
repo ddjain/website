@@ -5,6 +5,21 @@ date: 2017-01-04
 weight: 3
 ---
 
+## Purpose
+
+Pod network scenarios introduce network-level chaos at the pod layer, including traffic blocking (ingress/egress outage), latency injection, packet loss, and bandwidth restriction. These scenarios help validate how services and their dependencies behave under degraded network conditions, enabling teams to improve timeouts, alerting, and overall resilience.
+
+## Preconditions
+
+| Requirement | Details |
+|---|---|
+| Kubernetes version | 1.21+ |
+| kubeconfig | Valid kubeconfig with access to the target cluster |
+| RBAC permissions | Permissions to list, get, and exec into pods in the target namespace |
+| Container runtime | Supported container runtime (CRI-O, containerd, Docker) |
+| Network utilities | `tc` and `netem` kernel modules available on cluster nodes |
+| Network plugin | OpenShiftSDN or OVNKubernetes (for pod outage OVS flow rules) |
+
 <krkn-hub-scenario id="pod-network-chaos">
 
 ### Pod outage
@@ -85,3 +100,24 @@ Choose your preferred method to run pod network scenarios:
 {{< readfile file="_tab-krknctl.md" >}}
   {{< /tab >}}
 {{< /tabpane >}}
+
+## Expected Behavior
+
+When a pod network scenario runs successfully:
+
+- **Targeted pods** experience network degradation matching the configured chaos type (outage, latency, packet loss, or bandwidth restriction) for the specified `test_duration`.
+- **Ingress/Egress traffic** is selectively disrupted based on the `direction` parameter; only the configured directions and ports are affected.
+- **Monitoring metrics** show increased latency, elevated packet loss rates, or reduced throughput on the affected pods during the chaos window.
+- **Dependent services** exhibit timeout errors, retry storms, or degraded responses when communicating with the disrupted pods.
+- **Recovery** occurs automatically after the test duration expires; network conditions return to normal without manual intervention.
+- **Excluded pods** (those matching `exclude_label`) continue operating normally throughout the test.
+
+## Failure Handling
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Scenario fails to start with permission error | Insufficient RBAC permissions to exec into pods or manage network policies | Ensure the service account has `pods/exec` and `networkpolicies` permissions in the target namespace |
+| Network disruption not applied to target pods | Label selector does not match any running pods in the namespace | Verify `label_selector` and `namespace` values; run `kubectl get pods -n <namespace> -l <label>` to confirm matches |
+| Traffic still flows during outage scenario | Network plugin is not OpenShiftSDN or OVNKubernetes, so OVS flow rules cannot be applied | Confirm the cluster uses a supported network plugin; for unsupported plugins, use shaping scenarios instead |
+| Pods remain disrupted after test duration | The cleanup process was interrupted or the krkn pod was terminated mid-test | Manually remove OVS flow rules or network policies; restart affected pods to restore normal traffic |
+| `tc`/`netem` errors in scenario logs | The `tc` utility or `netem` kernel module is not available on the node | Ensure the node image includes `iproute2` and the `sch_netem` kernel module is loaded |
