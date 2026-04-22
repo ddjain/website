@@ -5,21 +5,21 @@ date: 2017-01-04
 weight: 3
 ---
 
-### Application outages
+## Purpose
+
 <krkn-hub-scenario id="application-outages">
-Scenario to block the traffic ( Ingress/Egress ) of an application matching the labels for the specified duration of time to understand the behavior of the service/other services which depend on it during downtime. This helps with planning the requirements accordingly, be it improving the timeouts or tweaking the alerts etc.
+Blocks the traffic (Ingress/Egress) of an application matching the specified labels for a configured duration. Use this to understand how your service and its dependents behave during network isolation — helping you plan timeout improvements, alert tuning, and dependency resilience.
 </krkn-hub-scenario>
-You can add in your applications URL into the [health checks section](../../krkn/config.md#health-checks) of the config to track the downtime of your application during this scenario 
 
-### Rollback Scenario Support
+## Preconditions
 
-Krkn supports rollback for Application outages. For more details, please refer to the [Rollback Scenarios](../../rollback-scenarios/_index.md) documentation.
+- Running Kubernetes (1.21+) or OpenShift cluster
+- Valid kubeconfig with cluster-admin access
+- RBAC: ability to create and delete NetworkPolicies in target namespaces
+- Container runtime: Docker (20.10+) or Podman (4.0+) — required for krkn-hub and krknctl methods
+- Target namespace must support NetworkPolicy enforcement (CNI plugin must support it — e.g., Calico, Cilium, OVN-Kubernetes)
 
-### Debugging steps in case of failures
-Kraken creates a network policy blocking the ingress/egress traffic to create an outage, in case of failures before reverting back the network policy, you can delete it manually by executing the following commands to stop the outage:
-```bash
-$ oc delete networkpolicy/kraken-deny -n <targeted-namespace>
-```
+You can add your application's URL into the [health checks section](../../krkn/config.md#health-checks) of the config to track downtime during this scenario.
 
 ## How to Run Application Outage Scenarios
 
@@ -36,6 +36,27 @@ Choose your preferred method to run application outage scenarios:
 {{< readfile file="_tab-krknctl.md" >}}
   {{< /tab >}}
 {{< /tabpane >}}
+
+## Expected Behavior
+
+- A NetworkPolicy named `kraken-deny` is created in the target namespace, blocking all Ingress and Egress traffic to matching pods
+- During the outage window, the targeted application should be unreachable — dependent services should show timeouts or fallback behavior
+- After the configured duration, Krkn automatically deletes the NetworkPolicy and traffic resumes
+- Recovery indicators: application pods respond to health probes, dependent services reconnect, and monitoring alerts clear
+
+## Failure Handling
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| Traffic still flowing during outage | The CNI plugin does not support NetworkPolicy enforcement | Verify your CNI supports NetworkPolicy (Calico, Cilium, OVN-Kubernetes). Flannel does not support it by default. |
+| NetworkPolicy not cleaned up after failure | Krkn crashed before the cleanup phase | Manually delete the policy: `kubectl delete networkpolicy kraken-deny -n <targeted-namespace>` |
+| `forbidden: cannot create networkpolicies` | Insufficient RBAC permissions | Grant `create`/`delete` permissions on `networkpolicies` to the service account |
+| Application does not recover after outage ends | The application lacks proper reconnection/retry logic | Check application health probes and restart pods if needed: `kubectl rollout restart deployment/<name> -n <namespace>` |
+| Dependent services permanently degraded | Circuit breakers tripped and did not reset | Reset circuit breakers manually or wait for the configured reset timeout |
+
+### Rollback Scenario Support
+
+Krkn supports rollback for Application outages. For more details, please refer to the [Rollback Scenarios](../../rollback-scenarios/_index.md) documentation.
 
 #### Demo
 See a demo of this scenario:
