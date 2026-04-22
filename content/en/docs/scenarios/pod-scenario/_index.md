@@ -5,13 +5,19 @@ date: 2017-01-04
 weight: 3
 ---
 
-This scenario disrupts the pods matching the label, excluded label or pod name in the specified namespace on a Kubernetes/OpenShift cluster.
+## Purpose
 
-## Why pod scenarios are important: 
+Pod scenarios disrupt pods matching a label, excluded label, or pod name in a specified namespace on a Kubernetes/OpenShift cluster. Use this to validate that your Deployments, ReplicaSets, and Services recover automatically after pod failures.
 
-Modern applications demand high availability, low downtime, and resilient infrastructure. Kubernetes provides building blocks like Deployments, ReplicaSets, and Services to support fault tolerance, but understanding how these interact during disruptions is critical for ensuring reliability. Pod disruption scenarios test this reliability under various conditions, validating that the application and infrastructure respond as expected.
+## Preconditions
 
-## Use cases of pod scenarios
+- Running Kubernetes (1.21+) or OpenShift cluster
+- Valid kubeconfig with access to target namespaces
+- RBAC: ability to `delete` pods and `get`/`list` pods in target namespaces
+- Container runtime: Docker (20.10+) or Podman (4.0+) — required for krkn-hub and krknctl methods
+
+## Use Cases
+
 <krkn-hub-scenario id="pod-scenarios">
 
 1. Deleting a single pod
@@ -38,13 +44,6 @@ kubectl get pods -n <namespace> -w # watch for new pods
 - **HA Indicator:** Rolling disruption does not take down the whole application.
 
 </krkn-hub-scenario>
-
-## How to know if it is highly available 
-- ***Multiple Replicas Exist:*** Confirmed by checking `kubectl get deploy -n <namespace>` and seeing atleast 1 replica.
-- ***Pods Distributed Across Nodes/availability zones:*** Using `topologySpreadConstraints` or observing pod distribution in `kubectl get pods -o wide`. See [Health Checks](../../krkn/health-checks.md) for real time visibility into the impact of chaos scenarios on application availability and performance
-- ***Service Uptime Remains Unaffected:*** During chaos test, verify app availability (synthetic probes, Prometheus alerts, etc).
-- ***Recovery Is Automatic:*** No manual intervention needed to restore service.
-- ***Krkn Telemetry Indicators:*** End of run data includes recovery times, pod reschedule latency, and service downtime which are vital metrics for assessing HA.
 
 ## Excluding Pods from Disruption
 
@@ -165,7 +164,31 @@ node_names:
 3. If `exclude_label` is also specified, it's applied after node filtering
 4. The remaining pods are subjected to chaos
 
-## Recovery Time Metrics in Krkn Telemetry
+## How to Run Pod Scenarios
+
+Choose your preferred method to run pod scenarios:
+
+{{< tabpane text=true >}}
+  {{< tab header="**Krkn**" lang="krkn" >}}
+{{< readfile file="_tab-krkn.md" >}}
+  {{< /tab >}}
+  {{< tab header="**Krkn-hub**" lang="krkn-hub" >}}
+{{< readfile file="_tab-krkn-hub.md" >}}
+  {{< /tab >}}
+  {{< tab header="**Krknctl**" lang="krknctl" >}}
+{{< readfile file="_tab-krknctl.md" >}}
+  {{< /tab >}}
+{{< /tabpane >}}
+
+## Expected Behavior
+
+### How to Know If It Is Highly Available
+- **Multiple Replicas Exist:** Confirmed by checking `kubectl get deploy -n <namespace>` and seeing at least 1 replica.
+- **Pods Distributed Across Nodes/Availability Zones:** Using `topologySpreadConstraints` or observing pod distribution in `kubectl get pods -o wide`. See [Health Checks](../../krkn/health-checks.md) for real-time visibility into the impact of chaos scenarios on application availability and performance.
+- **Service Uptime Remains Unaffected:** During the chaos test, verify app availability (synthetic probes, Prometheus alerts, etc).
+- **Recovery Is Automatic:** No manual intervention needed to restore service.
+
+### Recovery Time Metrics in Krkn Telemetry
 
 Krkn tracks three key recovery time metrics for each affected pod:
 
@@ -193,21 +216,15 @@ These metrics appear in the telemetry output under `PodsStatus.recovered` for su
 }
 ```
 
-## How to Run Pod Scenarios
+## Failure Handling
 
-Choose your preferred method to run pod scenarios:
-
-{{< tabpane text=true >}}
-  {{< tab header="**Krkn**" lang="krkn" >}}
-{{< readfile file="_tab-krkn.md" >}}
-  {{< /tab >}}
-  {{< tab header="**Krkn-hub**" lang="krkn-hub" >}}
-{{< readfile file="_tab-krkn-hub.md" >}}
-  {{< /tab >}}
-  {{< tab header="**Krknctl**" lang="krknctl" >}}
-{{< readfile file="_tab-krknctl.md" >}}
-  {{< /tab >}}
-{{< /tabpane >}}
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `no pods matching label selector` | The `--pod-label` or `label_selector` value does not match any pods in the target namespace | Verify labels with `kubectl get pods -n <namespace> --show-labels` and update the selector |
+| `namespace not found` | The `--namespace` or `namespace_pattern` does not match any namespace | Check namespace exists with `kubectl get ns` and fix the regex pattern |
+| `insufficient RBAC for pod deletion` | The kubeconfig user/service account lacks `delete` permissions on pods | Create a ClusterRole with `pods: [get, list, delete]` and bind it to the service account |
+| Pod recreated but not Ready within timeout | The replacement pod fails readiness probes or takes too long to start | Increase `--expected-recovery-time` or investigate application startup issues with `kubectl describe pod` |
+| `connection refused` or `cluster unreachable` | The kubeconfig points to an inaccessible cluster | Verify cluster access with `kubectl get nodes` and check kubeconfig path |
 
 #### Demo
 See a demo of this scenario:
